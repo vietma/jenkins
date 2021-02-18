@@ -4,3 +4,9 @@ jenkins:
     aws-java-sdk:
       enabled: yes
       version: "1.11.723"
+    apache-httpcomponents-client-4-api:
+      enabled: yes
+      version: "4.5.10-2.0"
+    jackson2-api:
+      enabled: yes
+      version: "2.11.0"
