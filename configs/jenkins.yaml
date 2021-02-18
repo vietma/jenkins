@@ -1,0 +1,6 @@
+---
+jenkins:
+  plugins:
+    aws-java-sdk:
+      enabled: yes
+      version: "1.11.723"

@@ -1,0 +1,39 @@
+---
+- name: Install Jenkins plugins
+  hosts: 127.0.0.1
+  gather_facts: no
+  connection: local
+  # Variable declaration
+  vars:
+    work_dir: /var/lib/jenkins
+  tasks:
+    ## Install Jenkins plugins ##
+    - name: Remove plugins dir
+      file:
+        state: absent
+        path: "{{ work_dir }}/plugins"
+
+    - name: Recreate empty plugins dir
+      file:
+        state: directory
+        path: "{{ work_dir }}/plugins"
+        owner: jenkins
+        group: jenkins
+
+    - name: Install plugins with a specific version
+      jenkins_plugin:
+        name: "{{ item.key }}"
+        version: "{{ item.value['version'] }}"
+        with_dependencies: yes
+      when: >
+        'version' in item.value
+      with_dict: "{{ jenkins.plugins }}"
+      register: result
+      retries: 60
+      delay: 2
+      until: result is not failed
+
+    - name: Restart Jenkins after plugin installation
+      service:
+        name: jenkins
+        state: restarted
