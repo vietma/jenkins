@@ -23,19 +23,6 @@
         name: jenkins
         state: restarted
 
-    # - name: Wait for Jenkins to start up
-    #   uri:
-    #     url: "{{ jenkins.host.protocol }}://{{ jenkins.host.hostname }}:{{ jenkins.host.port }}"
-    #     status_code: 200
-    #     timeout: 5
-    #   register: jenkins_service_status
-    #   # Keep trying for 5 mins in 5 sec intervals
-    #   retries: 240
-    #   delay: 5
-    #   until: >
-    #     'status' in jenkins_service_status and
-    #     jenkins_service_status['status'] == 200
-
     - name: Wait for Jenkins to start up
       uri:
         url: http://localhost:8080
@@ -62,7 +49,19 @@
         owner: jenkins
         group: jenkins
 
-    - name: Install plugins with a specific version
+    - name: Install Jenkins plugins without a specific version
+      jenkins_plugin:
+        name: "{{ item.key }}"
+        with_dependencies: yes
+      when: >
+        'version' not in item.value
+      with_dict: "{{ jenkins.plugins }}"
+      register: result
+      retries: 60
+      delay: 2
+      until: result is not failed
+
+    - name: Install Jenkins plugins with a specific version
       jenkins_plugin:
         name: "{{ item.key }}"
         version: "{{ item.value['version'] }}"
@@ -79,3 +78,16 @@
       service:
         name: jenkins
         state: restarted
+
+    - name: Wait for Jenkins to start up
+      uri:
+        url: http://localhost:8080
+        status_code: 200
+        timeout: 5
+      register: jenkins_service_status
+      # Keep trying for 5 mins in 5 sec intervals
+      retries: 240
+      delay: 5
+      until: >
+        'status' in jenkins_service_status and
+        jenkins_service_status['status'] == 200
