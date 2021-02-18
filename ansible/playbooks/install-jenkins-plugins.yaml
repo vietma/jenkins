@@ -7,6 +7,35 @@
   vars:
     work_dir: /var/lib/jenkins
   tasks:
+    - name: Start Jenkins
+      service:
+        name: jenkins
+        state: started
+
+    - name: Jenkins skip startUp wizard
+      lineinfile: dest=/etc/sysconfig/jenkins
+        regexp='^JENKINS_JAVA_OPTIONS='
+        line='JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+      register: result_skip_startup_wizard
+
+    - name: Restart Jenkins after disable startUp wizard
+      service:
+        name: jenkins
+        state: restarted
+
+    - name: Wait for Jenkins to start up
+      uri:
+        url: "{{ jenkins.host.protocol }}://{{ jenkins.host.hostname }}:{{ jenkins.host.port }}"
+        status_code: 200
+        timeout: 5
+      register: jenkins_service_status
+      # Keep trying for 5 mins in 5 sec intervals
+      retries: 240
+      delay: 5
+      until: >
+        'status' in jenkins_service_status and
+        jenkins_service_status['status'] == 200
+
     ## Install Jenkins plugins ##
     - name: Remove plugins dir
       file:
