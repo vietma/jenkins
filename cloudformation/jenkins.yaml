@@ -1,0 +1,138 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Create Jenkins instance using Amazon Linux 2 AMI
+
+Parameters:
+  BaseAMI:
+    Type: String
+    Description: Base AMI ID
+    Default: ami-0915bcb5fa77e4892
+  VPCId:
+    Type: String
+    Description: VPC ID
+    Default: vpc-71d47d0c
+  SubnetId:
+    Type: String
+    Description: SubnetID to use
+    Default: subnet-db48d684
+  InstanceType:
+    Type: String
+    Description: Instance type
+    Default: t2.micro
+  InstanceProfile:
+    Type: String
+    Description: IAM Instance profile to apply
+    Default: ProjectProvisioningInstanceProfile
+  KeyPair:
+    Type: String
+    Description: Default SSH KeyPair
+    Default: project
+  # CostCentre:
+  #   Type: String
+  #   Description: CostCentre ID for tagging purposes
+  #   Default: V_NABRWD
+  # ApplicationID:
+  #   Type: String
+  #   Description: ApplicationID for tagging purposes
+  #   Default: BA0455
+  # PowerMgt:
+  #   Type: String
+  #   Default: 24X7
+  Environment:
+    Type: String
+    Description: Environment for tagging purposes
+    Default: NonProd
+
+Resources:
+  JenkinsSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows SSH and access to the Jenkins service
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: SSH Access
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+        - CidrIp: 0.0.0.0/0
+          Description: Jenkins ports from private
+          FromPort: 8080
+          IpProtocol: tcp
+          ToPort: 8080
+        - CidrIp: 0.0.0.0/0
+          Description: Jenkins secured ports from private
+          FromPort: 8443
+          IpProtocol: tcp
+          ToPort: 8443
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+      VpcId: !Ref VPCId
+
+  JenkinsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      IamInstanceProfile:
+        Ref: InstanceProfile
+      ImageId:
+        Ref: BaseAMI
+      InstanceType:
+        Ref: InstanceType
+      KeyName:
+        Ref: KeyPair
+      SecurityGroupIds:
+        - Ref: JenkinsSG
+      SubnetId: !Ref SubnetId
+      # BlockDeviceMappings:
+      #   - DeviceName: /dev/sda1
+      #     Ebs:
+      #       VolumeSize: 200
+      #       VolumeType: gp2
+      Tags:
+        - Key: Name
+          Value: jenkins-devops
+        - Key: Base AMI
+          Value: !Ref BaseAMI
+        # - Key: CostCentre
+        #   Value: !Ref CostCentre
+        # - Key: ApplicationID
+        #   Value: !Ref ApplicationID
+        # - Key: PowerMgt
+        #   Value: !Ref PowerMgt
+        - Key: Environment
+          Value: !Ref Environment
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -ex
+
+          cd /etc/yum.repos.d && curl -O https://pkg.jenkins.io/redhat/jenkins.repo
+          rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+
+          yum -y install java jenkins git
+          amazon-linux-extras install -y ansible2
+
+          # yum -y install jenkins java docker git rh-ruby24 rh-ruby24-rubygem-bundler ansible
+          # pip install boto3
+          # groupadd docker
+          # usermod -aG docker jenkins
+          # sed -i "s/NotifyAccess=main/NotifyAccess=main\nGroup=docker/" /usr/lib/systemd/system/docker.service
+
+          # systemctl start jenkins
+
+          # systemctl start docker
+          # systemctl enable docker
+          # curl -O https://releases.hashicorp.com/packer/1.3.4/packer_1.3.4_linux_amd64.zip
+          # unzip packer_1.3.4_linux_amd64.zip
+          # mv packer /usr/local/bin/
+          # rm -f /sbin/packer
+
+          git clone https://github.com/vietma/jenkins.git
+
+          # cd jenkins/scripts
+          # chmod 777 install-jenkins-plugins.sh
+          # ./install-jenkins-plugins.sh
+
+          cd jenkins
+          make install-jenkins-plugins
