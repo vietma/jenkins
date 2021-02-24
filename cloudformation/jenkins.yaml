@@ -28,17 +28,6 @@ Parameters:
     Type: String
     Description: Default SSH KeyPair
     Default: project
-  # CostCentre:
-  #   Type: String
-  #   Description: CostCentre ID for tagging purposes
-  #   Default: V_NABRWD
-  # ApplicationID:
-  #   Type: String
-  #   Description: ApplicationID for tagging purposes
-  #   Default: BA0455
-  # PowerMgt:
-  #   Type: String
-  #   Default: 24X7
   Environment:
     Type: String
     Description: Environment for tagging purposes
@@ -85,22 +74,12 @@ Resources:
       SecurityGroupIds:
         - Ref: JenkinsSG
       SubnetId: !Ref SubnetId
-      # BlockDeviceMappings:
-      #   - DeviceName: /dev/sda1
-      #     Ebs:
-      #       VolumeSize: 200
-      #       VolumeType: gp2
+      
       Tags:
         - Key: Name
           Value: jenkins-devops
         - Key: Base AMI
           Value: !Ref BaseAMI
-        # - Key: CostCentre
-        #   Value: !Ref CostCentre
-        # - Key: ApplicationID
-        #   Value: !Ref ApplicationID
-        # - Key: PowerMgt
-        #   Value: !Ref PowerMgt
         - Key: Environment
           Value: !Ref Environment
       UserData:
@@ -129,10 +108,6 @@ Resources:
           # rm -f /sbin/packer
 
           git clone https://github.com/vietma/jenkins.git
-
-          # cd jenkins/scripts
-          # chmod 777 install-jenkins-plugins.sh
-          # ./install-jenkins-plugins.sh
 
           cd jenkins
           make install-jenkins-plugins
