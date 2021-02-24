@@ -100,6 +100,12 @@
         'enabled' in item.value
       with_dict: "{{ jenkins.plugins }}"
 
+    - name: Jenkins re-enable startUp wizard
+      lineinfile: dest=/etc/sysconfig/jenkins
+        regexp='^JENKINS_JAVA_OPTIONS='
+        line='JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=true"'
+      register: result_enable_startup_wizard
+
     - name: Restart Jenkins after plugin enabling
       service:
         name: jenkins
