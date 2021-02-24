@@ -1,0 +1,93 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create Instance Profiles
+
+Resources:
+  ProjectProvisioningRoles:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ProjectProvisioningRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+
+  ProjectProvisioningInstanceProfiles:
+    Type: AWS::IAM::InstanceProfile
+    DependsOn:
+      - ProjectProvisioningRoles
+    Properties:
+      InstanceProfileName: ProjectProvisioningInstanceProfile
+      Path: /
+      Roles:
+        - !Ref ProjectProvisioningRoles
+
+  ProjectProvisioningPolicies:
+    Type: AWS::IAM::ManagedPolicy
+    DependsOn: ProjectProvisioningRoles
+    Properties:
+      Roles:
+        - !Ref ProjectProvisioningRoles
+      ManagedPolicyName: ProjectProvisioningPolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - ec2:Describe*
+              - ec2:CreateTags
+              - ec2:CreateSnapshot
+              - ec2:DeleteSnapshot
+              - ec2:DeleteTags
+              - ec2:AttachVolume
+              - ec2:CreateVolume
+              - ec2:DeleteVolume
+              - ec2:DetachVolume
+              - ec2messages:GetMessages
+              - ec2messages:AcknowledgeMessage
+              - ec2messages:SendReply
+              - autoscaling:Describe*
+              - autoscaling:UpdateAutoScalingGroup
+              - autoscaling:EnterStandby
+              - autoscaling:ExitStandby
+              - autoscaling:CompleteLifecycleAction
+              - autoscaling:DeleteLifecycleHook
+              - autoscaling:PutLifecycleHook
+              - autoscaling:SetDesiredCapacity
+              - autoscaling:RecordLifecycleActionHeartbeat
+              - elasticloadbalancing:DescribeInstanceHealth
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - s3:*
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - dynamodb:PutItem
+              - dynamodb:DeleteItem
+              - dynamodb:GetItem
+              - dynamodb:UpdateItem
+              - dynamodb:UpdateTimeToLive
+              - dynamodb:Query
+              - dynamodb:DeleteTable
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - sns:GetTopicAttributes
+              - sns:SetTopicAttributes
+              - sns:AddPermission
+              - sns:RemovePermission
+              - sns:DeleteTopic
+              - sns:Subscribe
+              - sns:ListSubscriptionsByTopic
+              - sns:Receive
+              - sns:Publish
+              - sns:List*
+              - sns:Unsubscribe
+              - sqs:*
+            Effect: Allow
+            Resource: "*"
