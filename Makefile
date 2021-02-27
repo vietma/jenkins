@@ -2,4 +2,4 @@
 # 	./scripts/install-jenkins-plugins.sh
 
 create-jenkins-users:
-  ./scripts/create-jenkins-users.sh
+	./scripts/create-jenkins-users.sh
