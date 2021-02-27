@@ -2,7 +2,7 @@
 jenkins:
   jenkins_home: /var/lib/jenkins
   jenkins_process_user: jenkins
-  jenkins_process_group: "{{ jenkins_process_user }}"
+  jenkins_process_group: jenkins
   credentials:
     jenkins_admin_username: admin
     jenkins_admin_password: admin
