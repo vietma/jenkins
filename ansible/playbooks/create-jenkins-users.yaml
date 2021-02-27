@@ -33,6 +33,14 @@
         'status' in jenkins_service_status and
         jenkins_service_status['status'] == 200
 
+    - name: Create custom init scripts directory
+      file:
+        path: "{{ jenkins.jenkins_home }}/init.groovy.d"
+        state: directory
+        owner: "{{ jenkins.jenkins_process_user }}"
+        group: "{{ jenkins.jenkins_process_group }}"
+        mode: 0775
+
     - name: Configure default Jenkins users
       template:
         src: ../../templates/jenkins-basic-security.groovy.j2
