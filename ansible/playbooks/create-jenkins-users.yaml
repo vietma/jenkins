@@ -30,7 +30,7 @@
 
 - name: Configure default Jenkins users
   template:
-    src: templates/jenkins-basic-security.groovy.j2
+    src: ../../templates/jenkins-basic-security.groovy.j2
     dest: "{{ jenkins.jenkins_home }}/init.groovy.d/jenkins-basic-security.groovy"
     owner: "{{ jenkins.jenkins_process_user }}"
     group: "{{ jenkins.jenkins_process_group }}"
