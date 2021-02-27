@@ -74,7 +74,7 @@ Resources:
       SecurityGroupIds:
         - Ref: JenkinsSG
       SubnetId: !Ref SubnetId
-      
+
       Tags:
         - Key: Name
           Value: jenkins-devops
@@ -110,4 +110,5 @@ Resources:
           git clone https://github.com/vietma/jenkins.git
 
           cd jenkins
-          make install-jenkins-plugins
+          # make install-jenkins-plugins
+          make create-jenkins-users
