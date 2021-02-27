@@ -106,36 +106,36 @@
         line='JENKINS_JAVA_OPTIONS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=true"'
       register: result_enable_startup_wizard
 
-    - name: Define user creation script
-      vars:
-        user_creation: |
-          import hudson.model.*
-          import hudson.security.*
-          import hudson.tasks.Mailer
+    # - name: Define user creation script
+    #   vars:
+    #     user_creation: |
+    #       import hudson.model.*
+    #       import hudson.security.*
+    #       import hudson.tasks.Mailer
 
-          def userId = ${userId}
-          def password = ${password}
-          def email = ${email}
-          def instance = jenkins.model.Jenkins.instance
-          def existingUser = instance.securityRealm.allUsers.find {it.id == userId}
+    #       def userId = ${userId}
+    #       def password = ${password}
+    #       def email = ${email}
+    #       def instance = jenkins.model.Jenkins.instance
+    #       def existingUser = instance.securityRealm.allUsers.find {it.id == userId}
 
-          if (existingUser == null) {
-              def user = instance.securityRealm.createAccount(userId, password)
-              user.addProperty(new Mailer.UserProperty(email));
+    #       if (existingUser == null) {
+    #           def user = instance.securityRealm.createAccount(userId, password)
+    #           user.addProperty(new Mailer.UserProperty(email));
 
-              def strategy = (GlobalMatrixAuthorizationStrategy) instance.getAuthorizationStrategy()
-              strategy.add(Hudson.READ, userId)
-              instance.setAuthorizationStrategy(strategy)
-              instance.save()
-          }
+    #           def strategy = (GlobalMatrixAuthorizationStrategy) instance.getAuthorizationStrategy()
+    #           strategy.add(Hudson.READ, userId)
+    #           instance.setAuthorizationStrategy(strategy)
+    #           instance.save()
+    #       }
 
-    - name: Create Jenkins admin user
-      jenkins_script:
-        script: "{{ user_creation }}"
-        args:
-          userId: admin
-          password: admin
-          email: admin@example.com
+    # - name: Create Jenkins admin user
+    #   jenkins_script:
+    #     script: "{{ user_creation }}"
+    #     args:
+    #       userId: admin
+    #       password: admin
+    #       email: admin@example.com
 
     - name: Restart Jenkins after plugin enabling
       service:
