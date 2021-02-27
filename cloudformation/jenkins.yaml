@@ -110,5 +110,5 @@ Resources:
           git clone https://github.com/vietma/jenkins.git
 
           cd jenkins
-          # make install-jenkins-plugins
+          make install-jenkins-plugins
           make create-jenkins-users
